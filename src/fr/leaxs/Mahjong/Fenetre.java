@@ -17,7 +17,7 @@ public class Fenetre extends JFrame
             Logger.getLogger(Fenetre.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        this.setSize(plateau.getNombreColone()*30,plateau.getNombreLigne()*40);
+        this.setSize(plateau.getNombreColonne()*30,plateau.getNombreLigne()*40);
         
         this.add(new JPanelTuileDrawer(plateau));
         
