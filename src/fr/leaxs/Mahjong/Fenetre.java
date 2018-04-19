@@ -1,14 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.leaxs.Mahjong;
 
-/**
- *
- * @author axelp
- */
-public class Fenetre {
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+
+public class Fenetre extends JFrame
+{
+    private Plateau plateau;
+    public Fenetre()
+    {
+        super("mahjong");
+        try {
+            this.plateau = new Plateau();
+        } catch (IOException ex) {
+            Logger.getLogger(Fenetre.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        this.setSize(plateau.getNombreColone()*30,plateau.getNombreLigne()*40);
+        
+        this.add(new JPanelTuileDrawer(plateau));
+        
+        this.setVisible(true);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
     
 }

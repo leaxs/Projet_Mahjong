@@ -19,4 +19,10 @@ public class Tuile
     {
         return type.toString();
     }    
+
+    public Type_Tuile getType() {
+        return type;
+    }
+    
+    
 }

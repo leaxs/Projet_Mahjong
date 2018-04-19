@@ -62,4 +62,22 @@ public class Plateau {
         }
     }
 
+    public int getNombreLigne() {
+        return NOMBRE_LIGNE;
+    }
+
+    public int getNombreColone() {
+        return NOMBRE_COLONE;
+    }
+
+    public int getHauteur() {
+        return HAUTEUR;
+    }
+
+    public Tuile getTuileAt(int x, int y, int z) {
+        return plateau[x][y][z];
+    }
+    
+    
+
 }
