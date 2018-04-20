@@ -9,7 +9,7 @@ import java.util.Collections;
 
 public class Plateau {
 
-    public SelectionnedTuile selection1;
+    public TuileSelectionnee tuileSelectionnee;
 
     private int NOMBRE_LIGNE, NOMBRE_COLONNE, HAUTEUR;
     private Tuile[][][] plateau;
@@ -24,7 +24,7 @@ public class Plateau {
         }
         Collections.shuffle(tuiles);
 
-        BufferedReader fichier = new BufferedReader(new FileReader("Mahjong2.csv"));
+        BufferedReader fichier = new BufferedReader(new FileReader("Mahjong.csv"));
         int indexLigneFichier = 0;
         while (fichier.ready()) {
             String line = fichier.readLine();
@@ -65,6 +65,68 @@ public class Plateau {
         }
     }
 
+    boolean selectionnerTuile(int indexLigne, int indexColonne, int indexHauteur) {
+        Tuile tuile = getTuile(indexLigne, indexColonne, indexHauteur);
+        boolean tuileTrouvee = tuile != null;
+
+        if (tuileTrouvee) {
+            if (estJouable(indexLigne, indexColonne, indexHauteur)) {
+                if (tuileSelectionnee == null) {
+                    //Si aucune tuile n'est selectionné, on en selectionne une
+                    tuileSelectionnee = new TuileSelectionnee(indexLigne, indexColonne, indexHauteur, tuile);
+                } else if (tuileSelectionnee.getTuile() == tuile) {
+                    //Si la tuile est la meme que la selectionné, on la deselectionne
+                    tuileSelectionnee = null;
+                    tuileTrouvee = true;
+                } else if (tuileSelectionnee.getTuile().equals(tuile)) {
+                    //Si la tuile est du meme type que celle selectionné, on supprime les deux
+                    plateau[tuileSelectionnee.getIndexLigne()][tuileSelectionnee.getIndexColonne()][tuileSelectionnee.getHauteur()] = null;
+                    plateau[indexLigne][indexColonne][indexHauteur] = null;
+                    tuileSelectionnee = null;
+                    tuileTrouvee = true;
+                }
+            }
+
+        }
+        return tuileTrouvee;
+    }
+
+    public boolean estJouable(int indexLigne, int indexColonne, int indexHauteur) {
+        boolean estJouable = true;
+        if (indexHauteur != HAUTEUR - 1) {
+            for (int x = -1; x <= 1; x++) {
+                for (int y = -1; y <= 1; y++) {
+                    if (estJouable) {
+                        estJouable = getTuile(indexLigne + x, indexColonne + y, indexHauteur + 1) == null;
+                    }
+                }
+            }
+        }
+        if (estJouable) {
+            boolean libreCoteDroit = true;
+            boolean libreCoteGauche = true;
+            for (int x = -1; x <= 1; x++) {
+                libreCoteGauche = getTuile(indexLigne + x, indexColonne - 2, indexHauteur) == null ? libreCoteGauche : false;
+                libreCoteDroit = getTuile(indexLigne + x, indexColonne + 2, indexHauteur) == null ? libreCoteDroit : false;
+            }
+            estJouable = libreCoteDroit || libreCoteGauche;
+        }
+        return estJouable;
+    }
+
+    public Tuile getTuile(int indexLigne, int indexColonne, int indexHauteur) {
+        Tuile tuile = null;
+        if (indexLigne < NOMBRE_LIGNE && indexColonne < NOMBRE_COLONNE
+                && indexLigne >= 0 && indexColonne >= 0) {
+            tuile = plateau[indexLigne][indexColonne][indexHauteur];
+        }
+        return tuile;
+    }
+
+    public TuileSelectionnee getTuileSelectionnee() {
+        return tuileSelectionnee;
+    }
+
     public int getNombreLigne() {
         return NOMBRE_LIGNE;
     }
@@ -76,57 +138,4 @@ public class Plateau {
     public int getHauteur() {
         return HAUTEUR;
     }
-
-    public Tuile getTuileAt(int indexLigne, int indexColonne, int indexHauteur) {
-        if (indexLigne >= NOMBRE_LIGNE || indexColonne >= NOMBRE_COLONNE) {
-            return null;
-        }
-        return plateau[indexLigne][indexColonne][indexHauteur];
-    }
-
-    //TODO decalage ligne et colonne
-    boolean selectTuileAt(int indexLigne, int indexColonne, int indexHauteur) {
-        
-        System.out.println("Recherche de tuile en z=" + indexHauteur+" ("+indexLigne+"/"+indexColonne+")");
-        Tuile tuile;
-        boolean tuileFound;
-
-        tuile = getTuileAt(indexLigne, indexColonne, indexHauteur);
-        tuileFound = tuile != null;
-        if (tuileFound) {
-            System.out.println("Tuile Found");
-            if (isSelectionnable(indexLigne, indexColonne, indexHauteur)) {
-                System.out.println("Tuile selectable");
-                if (selection1 == null) {
-                    selection1 = new SelectionnedTuile(indexLigne, indexColonne, indexHauteur, tuile);
-                    System.out.println("selectionned tuile");
-                } else if (selection1.getTuile() == tuile) {
-                    selection1 = null;
-                    System.out.println("same tuile");
-                    tuileFound = true;
-                } else if (selection1.getTuile().equals(tuile)) {
-                    System.out.println("removing");
-                    plateau[selection1.getX()][selection1.getY()][selection1.getZ()] = null;
-                    plateau[indexLigne][indexColonne][indexHauteur] = null;
-                    selection1 = null;
-                    tuileFound = true;
-                }
-            }
-
-        }
-        return tuileFound;
-    }
-
-    public boolean isSelectionnable(int indexLigne, int indexColonne, int indexHauteur) {
-        int index1 = indexColonne - 2;
-        int index2 = indexColonne + 2;
-        
-        if(index1<0)
-            index1=0;
-        if(index2>NOMBRE_COLONNE)
-            index2=NOMBRE_COLONNE;
-        
-        return plateau[indexLigne][index1][indexHauteur] == null || plateau[indexLigne][index2][indexHauteur] == null;
-    }
-
 }

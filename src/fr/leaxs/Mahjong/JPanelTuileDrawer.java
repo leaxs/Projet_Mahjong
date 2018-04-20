@@ -15,24 +15,27 @@ public class JPanelTuileDrawer extends JPanel implements MouseListener {
 
     private final int LARGEUR_TUILE;
     private final int HAUTEUR_TUILE;
+    private final int[][] offsets;
     private BufferedImage[] images;
     private Plateau plateau;
 
     public JPanelTuileDrawer(Plateau plateau) {
         super();
 
-        LARGEUR_TUILE = 50;
-        HAUTEUR_TUILE = 60;
+        LARGEUR_TUILE = 100;
+        HAUTEUR_TUILE = 150;
+        this.offsets = new int[][]{{0, 0}, {LARGEUR_TUILE / 2, 0}, {0, HAUTEUR_TUILE / 2}, {LARGEUR_TUILE / 2, HAUTEUR_TUILE / 2}};
 
         try {
             this.plateau = plateau;
-            images = new BufferedImage[Type_Tuile.values().length];
+            images = new BufferedImage[Type_Tuile.values().length + 1];
             images[0] = ImageIO.read(new File("img/renard.png"));
             images[1] = ImageIO.read(new File("img/melanchon.png"));
             images[2] = ImageIO.read(new File("img/TubGuys.png"));
             images[3] = ImageIO.read(new File("img/Jeanne.png"));
             images[4] = ImageIO.read(new File("img/fry.png"));
             images[5] = ImageIO.read(new File("img/chien.png"));
+            images[6] = ImageIO.read(new File("img/Selection.png"));
         } catch (IOException ex) {
             Logger.getLogger(JPanelTuileDrawer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -47,17 +50,25 @@ public class JPanelTuileDrawer extends JPanel implements MouseListener {
         Tuile tuile;
         for (int indexHauteur = 0; indexHauteur < plateau.getHauteur(); indexHauteur++) {
             for (int indexLigne = 0; indexLigne < plateau.getNombreLigne(); indexLigne++) {
-                for (int indexColone = 0; indexColone < plateau.getNombreColonne(); indexColone++) {
-                    tuile = plateau.getTuileAt(indexLigne, indexColone, indexHauteur);
+                for (int indexColone = plateau.getNombreColonne() - 1; indexColone >= 0; indexColone--) {
+                    tuile = plateau.getTuile(indexLigne, indexColone, indexHauteur);
                     if (tuile != null) {
                         g.drawImage(
                                 images[tuile.getType().ordinal()],
-                                (int) ((float) indexColone / 2 * LARGEUR_TUILE) + 2 * indexHauteur,
-                                (int) ((float) indexLigne / 2 * HAUTEUR_TUILE) + indexHauteur,
-                                50, 60, this);
+                                (int) ((float) indexColone / 2 * LARGEUR_TUILE) + 10 * indexHauteur - 5 * indexColone,
+                                (int) ((float) indexLigne / 2 * HAUTEUR_TUILE) - 10 * indexHauteur - 5 * indexLigne,
+                                LARGEUR_TUILE, HAUTEUR_TUILE, this);
                     }
                 }
             }
+        }
+        TuileSelectionnee selection = plateau.getTuileSelectionnee();
+        if (selection != null) {
+            g.drawImage(
+                    images[6],
+                    (int) ((float) selection.getIndexColonne() / 2 * LARGEUR_TUILE) + 10 * selection.getHauteur() - 5 * selection.getIndexColonne(),
+                    (int) ((float) selection.getIndexLigne() / 2 * HAUTEUR_TUILE) - 10 * selection.getHauteur() - 5 * selection.getIndexLigne(),
+                    LARGEUR_TUILE, HAUTEUR_TUILE, this);
         }
     }
 
@@ -71,15 +82,31 @@ public class JPanelTuileDrawer extends JPanel implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        System.out.println("---");
         int ligneTuile;
         int colonneTuile;
-        int z = plateau.getHauteur()-1;
+        final int curseurX = e.getX();
+        final int curseurY = e.getY();
+
+        int z = plateau.getHauteur() - 1;
         boolean tuileFound = false;
+
         while (!tuileFound && z >= 0) {
-            colonneTuile = (e.getX() - 2 * z) / LARGEUR_TUILE;
-            ligneTuile = (e.getY() - z) / HAUTEUR_TUILE;
-            tuileFound = plateau.selectTuileAt(ligneTuile*2, colonneTuile*2, z);
+            //tuile paire
+            colonneTuile = (curseurX - 10 * z) / (LARGEUR_TUILE - 10);
+            ligneTuile = (curseurY + 10 * z) / (HAUTEUR_TUILE - 10);
+            tuileFound = plateau.selectionnerTuile(ligneTuile * 2, colonneTuile * 2, z);
+
+            //tuile impaire
+            if (!tuileFound) {
+                int i = 0;
+                while (!tuileFound && i < offsets.length) {
+                    colonneTuile = (int) (((float) (curseurX - offsets[i][0] - 10 * z) / (LARGEUR_TUILE - 10)) * 2);
+                    ligneTuile = (int) (((float) (curseurY - offsets[i][1] + 10 * z) / (HAUTEUR_TUILE - 10)) * 2);
+                    tuileFound = plateau.selectionnerTuile(ligneTuile, colonneTuile, z);
+                    i++;
+                }
+            }
+
             z--;
         }
         this.repaint();
