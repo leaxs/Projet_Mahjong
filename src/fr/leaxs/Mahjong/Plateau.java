@@ -1,11 +1,13 @@
 package fr.leaxs.Mahjong;
 
+import fr.leaxs.GUI.RessourceManager;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.JOptionPane;
 
 public class Plateau {
 
@@ -13,16 +15,18 @@ public class Plateau {
 
     private int NOMBRE_LIGNE, NOMBRE_COLONNE, HAUTEUR;
     private Tuile[][][] plateau;
+    private int tuileEnJeu;
 
     public Plateau() throws FileNotFoundException, IOException {
         ArrayList<Tuile> tuiles = new ArrayList<>();
 
-        for (Type_Tuile type : Type_Tuile.values()) {
-            for (int i = 0; i < 36; i++) {
-                tuiles.add(new Tuile(type));
+        for (int j = 0; j<RessourceManager.NOMBRE_TUILE_DIFFERENTES; j++) {
+            for (int i = 0; i < 24; i++) {
+                tuiles.add(new Tuile(j));
             }
         }
         Collections.shuffle(tuiles);
+        tuileEnJeu = tuiles.size();
 
         BufferedReader fichier = new BufferedReader(new FileReader("Mahjong.csv"));
         int indexLigneFichier = 0;
@@ -48,7 +52,7 @@ public class Plateau {
         fichier.close();
     }
 
-    void afficherConsole() {
+    public void afficherConsole() {
         System.out.println("Mahjong");
         for (int indexHauteur = 0; indexHauteur < HAUTEUR; indexHauteur++) {
             System.out.println("Etage " + indexHauteur);
@@ -65,7 +69,7 @@ public class Plateau {
         }
     }
 
-    boolean selectionnerTuile(int indexLigne, int indexColonne, int indexHauteur) {
+    public boolean selectionnerTuile(int indexLigne, int indexColonne, int indexHauteur) {
         Tuile tuile = getTuile(indexLigne, indexColonne, indexHauteur);
         boolean tuileTrouvee = tuile != null;
 
@@ -84,6 +88,9 @@ public class Plateau {
                     plateau[indexLigne][indexColonne][indexHauteur] = null;
                     tuileSelectionnee = null;
                     tuileTrouvee = true;
+                    
+                    tuileEnJeu -= 2;
+                    verificationFinDeJeu();
                 }
             }
 
@@ -137,5 +144,13 @@ public class Plateau {
 
     public int getHauteur() {
         return HAUTEUR;
+    }
+
+    private void verificationFinDeJeu() 
+    {
+        if(tuileEnJeu<=0)
+        {
+            JOptionPane.showMessageDialog(null, "Vous avez gagné !", "Victoire", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

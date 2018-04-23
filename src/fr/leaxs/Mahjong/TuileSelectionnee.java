@@ -1,6 +1,6 @@
 package fr.leaxs.Mahjong;
 
-class TuileSelectionnee 
+public class TuileSelectionnee 
 {
     private final int indexLigne;
     private final int indexColonne;

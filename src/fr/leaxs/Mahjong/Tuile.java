@@ -2,9 +2,9 @@ package fr.leaxs.Mahjong;
 
 public class Tuile 
 {
-    private final Type_Tuile type;
+    private final int type;
 
-    public Tuile(Type_Tuile type) 
+    public Tuile(int type) 
     {
         this.type = type;
     }
@@ -17,10 +17,10 @@ public class Tuile
     @Override
     public String toString() 
     {
-        return type.toString();
+        return "Type de la tuile : "+type;
     }    
 
-    public Type_Tuile getType() {
+    public int getType() {
         return type;
     }
     

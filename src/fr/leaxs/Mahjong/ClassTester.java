@@ -8,9 +8,9 @@ public class ClassTester
 {
     public static void testTuile()
     {
-        Tuile tuile = new Tuile(Type_Tuile.FRY);
-        Tuile tuile2 = new Tuile(Type_Tuile.DOG);
-        Tuile tuile3 = new Tuile(Type_Tuile.DOG);
+        Tuile tuile = new Tuile(0);
+        Tuile tuile2 = new Tuile(1);
+        Tuile tuile3 = new Tuile(1);
         
         System.out.println("Test de la classe Tuile");
         System.out.println("> tuile1 equals tuile2 ? " + tuile.equals(tuile2));
