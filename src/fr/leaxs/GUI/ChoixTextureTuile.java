@@ -1,26 +1,25 @@
 package fr.leaxs.GUI;
 
+import fr.leaxs.Mahjong.Fenetre;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
 public class ChoixTextureTuile extends javax.swing.JPanel {
 
-    private ArrayList<BufferedImage> listeImageDossier;
-    private ArrayList<BufferedImage> imagesSelectionnee;
-    private final RessourceManager ressourceManager;
+    private final ArrayList<BufferedImage> listeImageDossier;
+    private final ArrayList<BufferedImage> imagesSelectionnee;
+    private final Fenetre fenetre;
 
-    public ChoixTextureTuile(RessourceManager ressourceManager) {
-        this.ressourceManager = ressourceManager;
+    public ChoixTextureTuile(Fenetre fenetre) {
         listeImageDossier = RessourceManager.getImagesDansDossier("images/");
         imagesSelectionnee = new ArrayList<>(6);
         initComponents();
-        this.setMinimumSize(new Dimension(420, 200));
+        //this.setMinimumSize(new Dimension(420, 200));
+        this.fenetre = fenetre;
         
 
     }
@@ -130,8 +129,8 @@ public class ChoixTextureTuile extends javax.swing.JPanel {
     private void ActionPerformedValider(java.awt.event.ActionEvent evt) {
         if(panelSelectionnee.estComplet())
         {
-            ressourceManager.setImages(imagesSelectionnee);
-            this.setVisible(false);
+            this.fenetre.getRessourceManager().setImages(imagesSelectionnee);
+            retourMenu();
         }
         else if(listeImageDossier.size()+imagesSelectionnee.size()<6)
         {
@@ -140,30 +139,19 @@ public class ChoixTextureTuile extends javax.swing.JPanel {
         }
         else
         {
-            int reponse = JOptionPane.showConfirmDialog(
-                    this,
-                    "Le design n'est pas complet. Voulez-vous poursuivre en le complétant automatiquement avec des images du dossier?",
-                    "Veuillez choisir une option",                    
-                    JOptionPane.YES_NO_OPTION
-            );
-            if(reponse==JOptionPane.OK_OPTION)
-            {
-                int nombreDImagesAAjouter = 6-imagesSelectionnee.size();
-                for(int i = 0; i<nombreDImagesAAjouter;i++)
-                    panelSelectionnee.addImage(listeImageDossier.remove(0));
-                ressourceManager.setImages(imagesSelectionnee);
-                this.setVisible(false);
-            }
+            this.fenetre.getRessourceManager().completerListe(imagesSelectionnee, listeImageDossier);
+            retourMenu();
         }
     }
 
     private void ActionPerformedAnnuler(java.awt.event.ActionEvent evt) {
+        retourMenu();
+    }
+    
+    private void retourMenu()
+    {
         this.setVisible(false);
-        try {
-            this.finalize();
-        } catch (Throwable ex) {
-            Logger.getLogger(ChoixTextureTuile.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        this.fenetre.afficherMenuPricipale(this);
     }
 
     // Variables declaration - do not modify 

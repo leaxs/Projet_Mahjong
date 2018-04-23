@@ -2,11 +2,12 @@ package fr.leaxs.Mahjong;
 
 import fr.leaxs.GUI.RessourceManager;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class Plateau {
@@ -17,10 +18,10 @@ public class Plateau {
     private Tuile[][][] plateau;
     private int tuileEnJeu;
 
-    public Plateau() throws FileNotFoundException, IOException {
+    public void loadCarte(String path) {
         ArrayList<Tuile> tuiles = new ArrayList<>();
 
-        for (int j = 0; j<RessourceManager.NOMBRE_TUILE_DIFFERENTES; j++) {
+        for (int j = 0; j < RessourceManager.NOMBRE_TUILE_DIFFERENTES; j++) {
             for (int i = 0; i < 24; i++) {
                 tuiles.add(new Tuile(j));
             }
@@ -28,28 +29,33 @@ public class Plateau {
         Collections.shuffle(tuiles);
         tuileEnJeu = tuiles.size();
 
-        BufferedReader fichier = new BufferedReader(new FileReader("Mahjong.csv"));
-        int indexLigneFichier = 0;
-        while (fichier.ready()) {
-            String line = fichier.readLine();
-            if (indexLigneFichier == 1) {
-                String[] grandeursTable = line.split(";");
-                NOMBRE_LIGNE = Integer.parseInt(grandeursTable[0]);
-                NOMBRE_COLONNE = Integer.parseInt(grandeursTable[1]);
-                HAUTEUR = Integer.parseInt(grandeursTable[2]);
+        try {
+            BufferedReader fichier = new BufferedReader(new FileReader("Mahjong.csv"));
+            int indexLigneFichier = 0;
+            while (fichier.ready()) {
+                String line = fichier.readLine();
+                if (indexLigneFichier == 1) {
+                    String[] grandeursTable = line.split(";");
+                    NOMBRE_LIGNE = Integer.parseInt(grandeursTable[0]);
+                    NOMBRE_COLONNE = Integer.parseInt(grandeursTable[1]);
+                    HAUTEUR = Integer.parseInt(grandeursTable[2]);
 
-                plateau = new Tuile[NOMBRE_LIGNE][NOMBRE_COLONNE][HAUTEUR];
-            } else if (indexLigneFichier > 1) {
-                String[] repartitionPlateau = line.split(";");
-                for (int i = 0; i < repartitionPlateau.length; i++) {
-                    if (repartitionPlateau[i].equals("x")) {
-                        plateau[(indexLigneFichier - 2) % NOMBRE_LIGNE][i][(indexLigneFichier - 2) / NOMBRE_LIGNE] = tuiles.remove(0);
+                    plateau = new Tuile[NOMBRE_LIGNE][NOMBRE_COLONNE][HAUTEUR];
+                } else if (indexLigneFichier > 1) {
+                    String[] repartitionPlateau = line.split(";");
+                    for (int i = 0; i < repartitionPlateau.length; i++) {
+                        if (repartitionPlateau[i].equals("x")) {
+                            plateau[(indexLigneFichier - 2) % NOMBRE_LIGNE][i][(indexLigneFichier - 2) / NOMBRE_LIGNE] = tuiles.remove(0);
+                        }
                     }
                 }
+                indexLigneFichier++;
             }
-            indexLigneFichier++;
+            fichier.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Fenetre.class.getName()).log(Level.SEVERE, null, ex);
         }
-        fichier.close();
+
     }
 
     public void afficherConsole() {
@@ -88,9 +94,8 @@ public class Plateau {
                     plateau[indexLigne][indexColonne][indexHauteur] = null;
                     tuileSelectionnee = null;
                     tuileTrouvee = true;
-                    
+
                     tuileEnJeu -= 2;
-                    verificationFinDeJeu();
                 }
             }
 
@@ -146,11 +151,7 @@ public class Plateau {
         return HAUTEUR;
     }
 
-    private void verificationFinDeJeu() 
-    {
-        if(tuileEnJeu<=0)
-        {
-            JOptionPane.showMessageDialog(null, "Vous avez gagné !", "Victoire", JOptionPane.INFORMATION_MESSAGE);
-        }
+    public boolean partieTerminee() {
+        return tuileEnJeu <= 0;
     }
 }
